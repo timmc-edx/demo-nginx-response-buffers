@@ -1,4 +1,4 @@
-# Demo for nginx response buffer ssettings
+# Demo for nginx response buffer settings
 
 Experimentally determining the behavior of nginx proxying with respect to
 **response** headers and buffer size configuration.
