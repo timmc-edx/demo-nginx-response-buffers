@@ -65,9 +65,9 @@ class DemoHandler(BaseHTTPRequestHandler):
 
 
 def run():
-    port = 8000
+    port = 8001
     print(f"Listening on localhost:{port}", file=sys.stderr)
-    server_address = ('', 8000)
+    server_address = ('', port)
     httpd = HTTPServer(server_address, DemoHandler)
     httpd.serve_forever()
 

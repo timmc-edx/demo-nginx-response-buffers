@@ -2,7 +2,7 @@
 
 Run `python3 ./serve.py` to start the server.
 
-`GET http://localhost:8000/hlen/1000` to request a response with 1000 bytes of
+`GET http://localhost:8001/hlen/1000` to request a response with 1000 bytes of
 headers (including newlines and termination line). Body will indicate actual
 sent header bytes.
 
