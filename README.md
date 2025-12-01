@@ -64,5 +64,8 @@ results in the same behavior.
 ## Conclusions
 
 - All of the response headers together must fit inside `proxy_buffer_size`.
-- The `proxy_buffers` and `proxy_busy_buffers_size` are not relevant to header
-  sizes.
+- The response headers can exceed the size of *one* of the `proxy_buffers`
+  buffers.
+- Neither `proxy_busy_buffers_size` nor the *sum* of the `proxy_buffers` limits
+  the response headers, since these must both exceed `proxy_buffer_size` (due to
+  constraints on `proxy_busy_buffers_size`).
