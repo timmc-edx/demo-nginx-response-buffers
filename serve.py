@@ -1,13 +1,17 @@
+import re
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 class DemoHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        want_headers_size = 146
-        default_chunk_size = 5  # number of chars in a Fill header value
+        req_match = re.fullmatch('/hlen/([0-9]+)', self.path)
+        if req_match is None:
+            raise RuntimeError('Request path did not match spec.')
 
-        headers_bytes = 0  # bytes = chars, it's all ASCII
+        want_headers_size = int(req_match.group(1))
+        # Accumulator for size of headers we've sent. It's all ASCII, so bytes = chars.
+        headers_bytes = 0
 
         self.send_response(200, 'OK')
         headers_bytes += len(
@@ -28,6 +32,9 @@ class DemoHandler(BaseHTTPRequestHandler):
         if to_fill < fill_overhead + 1:
             raise RuntimeError("Desired headers size is too small")
 
+        # Number of chars in a Fill header value (except for last one).
+        # Chosen to fill out an 80-column terminal window nicely.
+        default_chunk_size = 314
         while to_fill > 0:
             # Final chunk may need to be longer than default due to overhead.
             if to_fill >= fill_overhead + default_chunk_size + fill_overhead + 1:
