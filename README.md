@@ -1,5 +1,10 @@
 # Demo for nginx response buffer ssettings
 
+Experimentally determining the behavior of nginx proxying with respect to
+**response** headers and buffer size configuration.
+
+## Usage
+
 Run `python3 ./serve.py` to start the server.
 
 `GET http://localhost:8001/hlen/1000` to request a response with 1000 bytes of
@@ -36,8 +41,28 @@ server {
     - nginx error log: "upstream sent too big header while reading response header from upstream"
     - Python server reports "Connection reset by peer"
 
+The same behavior is observed when adding the following defaults explicitly:
+
+```
+    proxy_buffering on;
+    proxy_buffer_size 4k;
+    proxy_buffers 8 4k;
+    proxy_busy_buffers_size 8k;
+```
+
 ### With `proxy_buffer_size 8k`
 
 Setting `proxy_buffer_size 8k;` in the location block results in the same
 behavior, but with the cutoff at 8192 instead of 4096. No surprise there, but it
 hints that this default was the limiting factor.
+
+### With `proxy_buffer_size 1k`
+
+Dropping `proxy_buffer_size` to below the size of the `proxy_buffers` still
+results in the same behavior.
+
+## Conclusions
+
+- All of the response headers together must fit inside `proxy_buffer_size`.
+- The `proxy_buffers` and `proxy_busy_buffers_size` are not relevant to header
+  sizes.
