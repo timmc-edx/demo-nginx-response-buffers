@@ -61,6 +61,12 @@ hints that this default was the limiting factor.
 Dropping `proxy_buffer_size` to below the size of the `proxy_buffers` still
 results in the same behavior.
 
+### With `proxy_buffers 5 1k`
+
+Dropping to `proxy_buffers 5 1k` to get small buffers (and to
+`proxy_busy_buffers_size 4k` to meet config invariants) still results in the
+same behavior.
+
 ## Conclusions
 
 - All of the response headers together must fit inside `proxy_buffer_size`.
