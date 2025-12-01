@@ -5,11 +5,13 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 class DemoHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        req_match = re.fullmatch('/hlen/([0-9]+)', self.path)
+        req_match = re.fullmatch('/hlen/([0-9]+)/blen/([0-9]+)', self.path)
         if req_match is None:
             raise RuntimeError('Request path did not match spec.')
 
         want_headers_size = int(req_match.group(1))
+        want_body_size = int(req_match.group(2))
+
         # Accumulator for size of headers we've sent. It's all ASCII, so bytes = chars.
         headers_bytes = 0
 
@@ -20,9 +22,8 @@ class DemoHandler(BaseHTTPRequestHandler):
             'Date: Mon, 01 Jan 0000 00:00:00 GMT\r\n'
         )
 
-        planned_body_size = 30
-        self.send_header('Content-Length', str(planned_body_size))
-        headers_bytes += len(f'Content-Length: {planned_body_size}\r\n')
+        self.send_header('Content-Length', str(want_body_size))
+        headers_bytes += len(f'Content-Length: {want_body_size}\r\n')
 
         # We've sent all of the headers except the Fill lines and the
         # terminating blank line.
@@ -52,15 +53,21 @@ class DemoHandler(BaseHTTPRequestHandler):
 
         self.end_headers()
         headers_bytes += 2
-        self.flush_headers()
 
-        # This serves as a double-check.
-        body = f'Headers size: {headers_bytes}'.encode()
-        body_pad_len = planned_body_size - len(body) - 1
-        if body_pad_len < 0:
-            raise RuntimeError('Body too large')
-        body += b' ' * body_pad_len
-        body += b'\n'
+        if headers_bytes != want_headers_size:
+            raise RuntimeError("Intended to generate {want_headers_size} bytes of headers, but got {headers_bytes}")
+
+        if want_body_size == 0:
+            body = b''
+        else:
+            # Non-empty body is b'pad' on repeat plus a newline.
+            pad = b'pad'
+            body = pad * (want_body_size // len(pad) + 1)
+            body = body[:want_body_size - 1] + b'\n'
+        if len(body) != want_body_size:
+            raise RuntimeError("Intended to generate {want_body_size} bytes of headers, but got {len(body)}")
+
+        self.flush_headers()
         self.wfile.write(body)
 
 

@@ -7,9 +7,9 @@ Experimentally determining the behavior of nginx proxying with respect to
 
 Run `python3 ./serve.py` to start the server.
 
-`GET http://localhost:8001/hlen/1000` to request a response with 1000 bytes of
-headers (including newlines and termination line). Body will indicate actual
-sent header bytes.
+`GET http://localhost:8001/hlen/1000/blen/50` to request a response with 1000
+bytes of headers (including newlines and termination line) and 50 bytes of body
+(including trailing newline).
 
 This can then be proxied by nginx to test response buffer settings:
 
